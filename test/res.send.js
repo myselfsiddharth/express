@@ -217,6 +217,31 @@ describe('res', function(){
         .expect(200, "hey", done);
     })
 
+    it('should accept ArrayBuffer', function(done){
+      var app = express();
+      app.use(function(req, res){
+        const encodedHey = new TextEncoder().encode("hey");
+        res.set("Content-Type", "text/plain").send(encodedHey.buffer);
+      })
+
+      request(app)
+        .get("/")
+        .expect("Content-Type", "text/plain; charset=utf-8")
+        .expect(200, "hey", done);
+    })
+
+    it('should set Content-Type to application/octet-stream for ArrayBuffer without type', function(done){
+      var app = express();
+      app.use(function(req, res){
+        res.send(new ArrayBuffer(4));
+      })
+
+      request(app)
+        .get("/")
+        .expect("Content-Type", "application/octet-stream")
+        .expect(200, done);
+    })
+
     it('should not override ETag', function (done) {
       var app = express()
 
